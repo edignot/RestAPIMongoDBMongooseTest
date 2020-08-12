@@ -10,12 +10,13 @@ const createProduct = async (req, res, next) => {
         name: req.body.name,
         price: req.body.price,
     };
+
     const client = new MongoClient(url);
 
     try {
         await client.connect();
         const db = client.db();
-        const result = db.collection('products').insertOne(newProduct);
+        db.collection('products').insertOne(newProduct);
     } catch (error) {
         return response.json({ message: 'We could not store data' });
     }
@@ -24,7 +25,21 @@ const createProduct = async (req, res, next) => {
     res.json(newProduct);
 };
 
-const getProducts = async () => {};
+const getProducts = async (req, res, next) => {
+    const client = new MongoClient(url);
+
+    let products;
+
+    try {
+        await client.connect();
+        const db = client.db();
+        products = await db.collection('products').find().toArray();
+    } catch (error) {
+        return response.json({ message: 'Could not get products' });
+    }
+    client.close();
+    res.json(products);
+};
 
 exports.createProduct = createProduct;
 exports.getProducts = getProducts;
